@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookstack-config
+data:
+  PGID: "1000"
+  PUID: "1000"
+  TZ: "Etc/UTC"
+  APP_URL: "https://bookstack.edusuc.net"
+  DB_HOST: "bookstack_db"
+  DB_PORT: "3306"
+  DB_DATABASE: "bookstackapp"
+  DB_USERNAME: "bookstack"
+  MAIL_DRIVER: "smtp"
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_PORT: "465"
+  MAIL_FROM_NAME: "BookStack"
+  MAIL_FROM: "info@devopseasylearning.com"
+  MAIL_USERNAME: "info@devopseasylearning.com"
+  MAIL_ENCRYPTION: "tls"
