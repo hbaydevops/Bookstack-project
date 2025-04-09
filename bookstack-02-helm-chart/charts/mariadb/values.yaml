@@ -1,0 +1,13 @@
+image: lscr.io/linuxserver/mariadb
+tag: latest
+port: 3306
+
+env:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: "Etc/UTC"
+  MYSQL_DATABASE: "bookstackapp"
+  MYSQL_USER: "bookstack"
+
+pvc:
+  size: 2Gi

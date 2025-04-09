@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bookstack.fullname" . }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ include "bookstack.fullname" . }}
+  ports:
+    - port: 80
+      targetPort: {{ .Values.port }}

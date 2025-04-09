@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mariadb.fullname" . }}
+spec:
+  serviceName: {{ include "mariadb.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "mariadb.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "mariadb.fullname" . }}
+    spec:
+      containers:
+        - name: mariadb
+          image: "{{ .Values.mariadb.image }}:{{ .Values.mariadb.tag }}"
+          ports:
+            - containerPort: 3306
+          envFrom:
+            - configMapRef:
+                name: {{ include "mariadb.fullname" . }}-config
+            - secretRef:
+                name: {{ include "mariadb.fullname" . }}-secrets
+          volumeMounts:
+            - name: db-volume
+              mountPath: /var/lib/mysql
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: [ "mysqladmin", "ping", "-h", "localhost" ]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: db-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi

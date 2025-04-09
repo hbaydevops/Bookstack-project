@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bookstack-helm
+description: A Helm chart for deploying BookStack with MariaDB
+type: application
+version: 0.1.0
+appVersion: "latest"

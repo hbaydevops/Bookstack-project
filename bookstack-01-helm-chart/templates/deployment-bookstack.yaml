@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bookstack.fullname" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "bookstack.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "bookstack.fullname" . }}
+    spec:
+      containers:
+        - name: bookstack
+          image: "{{ .Values.bookstack.image }}:{{ .Values.bookstack.tag }}"
+          ports:
+            - containerPort: {{ .Values.bookstack.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "bookstack.fullname" . }}-config
+            - secretRef:
+                name: {{ include "bookstack.fullname" . }}-secrets
+          volumeMounts:
+            - name: bookstack-config
+              mountPath: /config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.bookstack.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.bookstack.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: bookstack-config
+          persistentVolumeClaim:
+            claimName: {{ include "bookstack.fullname" . }}-pvc

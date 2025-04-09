@@ -6,8 +6,7 @@ A. Backend: MariaDB
 4. Statefulset
     - Liveness Probe
     - Readiness Probe
-5. NetworkPolicy
-6. Namespace
+5. Namespace
 
 
 B. FrontEnd: Bookstack
@@ -20,4 +19,3 @@ B. FrontEnd: Bookstack
     - Readiness Probe
 6. NetworkPolicy
 7. Namespace
-7. 

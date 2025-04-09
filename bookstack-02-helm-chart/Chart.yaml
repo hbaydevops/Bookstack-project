@@ -1,0 +1,13 @@
+apiVersion: v2
+name: bookstack-helm
+description: Helm chart for deploying BookStack and MariaDB
+type: application
+version: 0.1.0
+appVersion: "latest"
+dependencies:
+  - name: bookstack
+    version: 0.1.0
+    repository: "file://charts/bookstack"
+  - name: mariadb
+    version: 0.1.0
+    repository: "file://charts/mariadb"

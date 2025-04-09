@@ -1,0 +1,64 @@
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-bookstack-to-db
+#   namespace: bookstack  # Add the namespace where this policy should be applied
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: bookstack-db  # Target the pods with label app=bookstack-db in the bookstack namespace
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: bookstack  # Allow traffic from pods with the app=bookstack label
+#           namespaceSelector:
+#             matchLabels:
+#               name: bookstack  # Restrict the source to pods in the "bookstack" namespace
+#       ports:
+#         - protocol: TCP
+#           port: 3306  
+#   policyTypes:
+#     - Ingress
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-bookstack-to-db-and-back
+  namespace: bookstack  # Applies in the bookstack namespace
+spec:
+  podSelector:
+    matchLabels:
+      app: bookstack-db  # Target backend pods (MariaDB)
+  
+  # Ingress policy: Allows frontend (BookStack) to communicate with backend (MariaDB)
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: bookstack  # Allow traffic from frontend pods (BookStack)
+          namespaceSelector:
+            matchLabels:
+              name: bookstack  # Restrict to traffic from the bookstack namespace
+      ports:
+        - protocol: TCP
+          port: 3306  # MariaDB default port
+
+  # Egress policy: Allows backend (MariaDB) to communicate with frontend (BookStack)
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: bookstack  # Allow traffic to frontend pods (BookStack)
+          namespaceSelector:
+            matchLabels:
+              name: bookstack  # Restrict to traffic to the bookstack namespace
+      ports:
+        - protocol: TCP
+          port: 80  # Frontend application port (BookStack)
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+

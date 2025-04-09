@@ -1,0 +1,32 @@
+# Default values for bookstack-helm.
+
+bookstack:
+  image: lscr.io/linuxserver/bookstack
+  tag: latest
+  port: 80
+  env:
+    PUID: "1000"
+    PGID: "1000"
+    TZ: "Etc/UTC"
+    APP_URL: "https://bookstack.edusuc.net"
+  pvc:
+    size: 1Gi
+
+mariadb:
+  image: lscr.io/linuxserver/mariadb
+  tag: latest
+  port: 3306
+  env:
+    PUID: "1000"
+    PGID: "1000"
+    TZ: "Etc/UTC"
+    MYSQL_DATABASE: "bookstackapp"
+    MYSQL_USER: "bookstack"
+  pvc:
+    size: 5Gi
+
+ingress:
+  enabled: true
+  host: bookstack.edusuc.net
+  tls: true
+  tlsSecretName: bookstack-tls

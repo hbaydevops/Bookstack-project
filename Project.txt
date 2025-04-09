@@ -1,0 +1,162 @@
+ Kubernetes Deployment Challenge: BookStack App
+
+Context:
+You’re deploying BookStack, a documentation platform, along with a MariaDB backend, on a
+Kubernetes cluster. The application should be production-ready, using persistent storage, secure
+credentials, and accessible via a browser.
+
+Tasks
+1. Deploy BookStack and MariaDB in a dedicated namespace.
+2. Ensure sensitive credentials such as database passwords and mail settings are securely
+   handled.
+3. Use persistent storage for both the BookStack configuration and the MariaDB database.
+4. BookStack must connect to the MariaDB instance for database operations.
+5. Mail notifications must be configured using SMTP (Gmail).
+6. The BookStack web interface must be exposed and reachable externally.
+7. Verify the deployment works end-to-end:
+o  BookStack loads in a browser.
+o  The database connection is successful.
+o  Emails can be sent from the app.
+
+Success Criteria
+• Pods are running and healthy.
+• Persistent volumes are mounted and in use.
+• Secrets are not exposed in plain text.
+• Services allow internal and external connectivity.
+• BookStack loads correctly and functions fully
+
+
+Kubernetes Deployment Reference:
+
+BookStack Stack
+This document outlines the required components and configurations needed to deploy the
+BookStack application and its MariaDB database backend to a Kubernetes cluster. It is
+based on an analysis of a Docker Compose setup and serves as a conversion reference for
+Kubernetes deployments.
+
+Main Configuration Overview
+Component               Type                Details
+App Name                Application         BookStack (lscr.io/linuxserver/bookstack:latest)
+Database                Service             MariaDB (lscr.io/linuxserver/mariadb)
+App Port                Port                80 (exposed as 6875:80 in Compose)
+Volumes                 Persistent          Storage bookstack_config:/config, bookstack_db_data:/var/lib/mysql
+Network                 Internal Network    proxy_network (or default)
+Environment Vars        Configuration       See environment variables section below
+
+
+Environment Variables - BookStack
+Variable            Value
+PUID                1000
+PGID                1000
+TZ                  Etc/UTC
+APP_URL             https://bookstack.edusuc.net
+APP_KEY             base64:6um2Xi48STZ+dqwdHJOCgta1/VKJhdUj4gFjZEfchu4=
+DB_HOST             bookstack_db
+DB_PORT             3306
+DB_USERNAME         bookstack
+DB_PASSWORD         bookstack
+DB_DATABASE         bookstackapp
+MAIL_DRIVER         smtp
+MAIL_FROM_NAME      BookStack
+MAIL_FROM           info@devopseasylearning.com
+MAIL_HOST           smtp.gmail.com
+MAIL_PORT           465
+MAIL_USERNAME       info@devopseasylearning.com
+MAIL_PASSWORD       Edhfgnurn$@!HDK
+MAIL_ENCRYPTION     tls
+
+
+
+Environment Variables - MariaDB
+Variable                        Value
+PUID                            1000
+PGID                            1000
+TZ Etc/UTC
+MYSQL_ROOT_PASSWORD             bookstack
+MYSQL_DATABASE                  bookstackapp
+MYSQL_USER                      bookstack
+MYSQL_PASSWORD                  bookstack
+
+______________________________________________________________________
+
+Bookstack-helm-chart
+
+bookstack-helm/
+├── Chart.yaml
+├── values.yaml
+├── templates/
+│   ├── configmap-bookstack.yaml
+│   ├── configmap-mariadb.yaml
+│   ├── secret-bookstack.yaml
+│   ├── secret-mariadb.yaml
+│   ├── pvc-bookstack.yaml
+│   ├── pvc-mariadb.yaml
+│   ├── service-bookstack.yaml
+│   ├── service-mariadb.yaml
+│   ├── deployment-bookstack.yaml
+│   ├── statefulset-mariadb.yaml
+│   ├── ingress.yaml
+│   └── networkpolicy.yaml
+
+
+This Helm chart provides a full setup for both BookStack and MariaDB with:
+
+ConfigMaps and Secrets for environment variables.
+
+PVCs for persistent storage.
+
+StatefulSet for MariaDB with liveness and readiness probes.
+
+Deployment for BookStack with liveness and readiness probes.
+
+Ingress configuration for TLS-enabled access.
+
+NetworkPolicy allowing communication between BookStack and MariaDB.
+
+You can now install the chart with helm install <release-name> ./bookstack-helm after placing this structure in your local Helm chart directory.
+
+_____________________________________________________________________________
+
+Split into two subcharts (cleaner for reuse and upgrades), not bookstack and mariadb in the same chart.
+store email/database credentials using Helm secrets via SealedSecrets/ExternalSecrets; do not want to store email/database credentials using values.yaml
+Want Ingress with TLS config
+
+
+bookstack-helm/
+├── Chart.yaml
+├── values.yaml
+├── charts/
+│   ├── bookstack/
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/
+│   │       ├── deployment.yaml
+│   │       ├── configmap.yaml
+│   │       ├── service.yaml
+│   │       ├── pvc.yaml
+│   │       ├── ingress.yaml
+│   │       ├── networkpolicy.yaml
+│   └── mariadb/
+│       ├── Chart.yaml
+│       ├── values.yaml
+│       └── templates/
+│           ├── statefulset.yaml
+│           ├── configmap.yaml
+│           ├── service.yaml
+│           ├── pvc.yaml
+│           ├── networkpolicy.yaml
+├── secrets/
+│   ├── bookstack-sealedsecret.yaml
+│   └── mariadb-sealedsecret.yaml
+
+Now you have a complete Helm chart with:
+
+Subcharts for BookStack and MariaDB
+
+SealedSecrets for sensitive data
+
+Ingress with TLS configuration
+
+NetworkPolicy for secure communication
+
+This should be ready to go! You can now install the entire stack using helm install with proper values overriding through values.yaml.
